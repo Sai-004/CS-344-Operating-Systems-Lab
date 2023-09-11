@@ -1,0 +1,54 @@
+#include<stdio.h>
+#include<sys/types.h>
+#include<unistd.h>
+
+int forking(pid_t pid,FILE *fp,int n,int i)
+{
+    pid =fork();
+    if(pid<0)
+    {
+        fprintf(stderr,"Fork Failed");
+        return 1;
+    }
+    else if(pid ==0)
+    {
+        printf("child %d started, n=%d\n",i,n);
+        fprintf(fp,"Child %d: ",getpid());
+        while(n!=1)
+        {
+            fprintf(fp,"%d ",n);
+            if(n%2==0)
+                n=n/2;
+            else
+                n=3*n+1;
+        }
+        fprintf(fp,"\n");
+        exit(0);
+    }
+    return 0;
+}
+
+int main(int argc,char* argv[])
+{
+    // if(argc!=1)
+    // {
+    //     printf("n not specified\n");
+    //     return 1;
+    // }
+    FILE *fp;
+    fp =fopen("q4_output.txt","a");
+    int n=atoi(argv[1]);
+    pid_t pid;int i,c=0;
+    for(i=1;i<=50;i++)
+    {
+        forking(pid,fp,i*n,i);
+        if(i==1||i==3||i==5||i==7||i==9)
+        {
+            c++;
+        }
+        if(c<5) wait(NULL);
+    }
+    printf("Children 1,3,5,7,9 Completed. File Position Indicator: %ld\n",ftell(fp));    
+    return 0;
+}
+
